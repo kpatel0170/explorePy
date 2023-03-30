@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5d68b4a-64b1-4ce1-a10a-763746943b51" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/day16-coffeeMachine-OOP/coffee-maker.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/day16-coffeeMachine-OOP/money-machine.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/day-20-Snake-game/food.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/day-20-Snake-game/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/day-20-Snake-game/scoreboard.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/day-20-Snake-game/snake.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/day15-cofeeMachine.py" beforeDir="false" afterPath="$PROJECT_DIR$/day15-coffeeMachine.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +26,9 @@
     <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectId" id="2MUhKwp7kMmTsDVevPkzTtDRQHE" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -48,6 +51,11 @@
     ]
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Python" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="day1-BandNameGenerator" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Python" />
@@ -83,7 +91,7 @@
       <workItem from="1677828015038" duration="3447000" />
       <workItem from="1678645018961" duration="282000" />
       <workItem from="1678645378185" duration="2325000" />
-      <workItem from="1680149140741" duration="2528000" />
+      <workItem from="1680149140741" duration="3437000" />
     </task>
     <servers />
   </component>
@@ -104,7 +112,8 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Python$day1_BandNameGenerator.coverage" NAME="day1-BandNameGenerator Coverage Results" MODIFIED="1680149216289" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python$day5_password_generator.coverage" NAME="day5-password-generator Coverage Results" MODIFIED="1680149745297" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Python$main.coverage" NAME="day1 Coverage Results" MODIFIED="1677828571561" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python$main.coverage" NAME="main Coverage Results" MODIFIED="1680184999242" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/day-20-Snake-game" />
     <SUITE FILE_PATH="coverage/Python$day3_project_treasure.coverage" NAME="day3-project-treasure Coverage Results" MODIFIED="1680149543608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Python$snake.coverage" NAME="snake Coverage Results" MODIFIED="1680184996589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/day-20-Snake-game" />
   </component>
 </project>
