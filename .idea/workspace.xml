@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5d68b4a-64b1-4ce1-a10a-763746943b51" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/day15-cofeeMachine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/day3-love-calculator.py" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/day16-coffeeMachine-OOP/coffee-maker.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/day16-coffeeMachine-OOP/money-machine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/day15-cofeeMachine.py" beforeDir="false" afterPath="$PROJECT_DIR$/day15-coffeeMachine.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +83,7 @@
       <workItem from="1677828015038" duration="3447000" />
       <workItem from="1678645018961" duration="282000" />
       <workItem from="1678645378185" duration="2325000" />
-      <workItem from="1680149140741" duration="1257000" />
+      <workItem from="1680149140741" duration="2528000" />
     </task>
     <servers />
   </component>
