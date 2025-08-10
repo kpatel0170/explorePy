@@ -462,18 +462,15 @@ class PersonalGrowthAggregator:
         - 5-7 long-term wealth building concepts and strategies
         - For EACH strategy provide:
           - **Strategy Name**: Clear description of the approach
-          - **Implementation**: Step-by-step how to start
-          - **Timeline**: Expected timeframe for results
-          - **Risk/Reward**: What to expect and potential downsides
+            - **Implementation**: Step-by-step how to start
+            - **Timeline**: Expected timeframe for results
+            - **Risk/Reward**: What to expect and potential downsides
         - Focus on: investment principles, asset building, passive income, retirement planning
 
         ## 🧠 PRODUCTIVITY & LIFE OPTIMIZATION
         - 6-9 practical life improvement tips and productivity hacks
         - For EACH tip provide:
-          - **Life Hack**: What it is and why it works
-          - **Implementation**: Specific steps to adopt it
-          - **Time/Money Saved**: Quantified benefit when possible
-          - **Personal Impact**: How it improves daily life
+          - **Life Hack**: What it is and why it works. <Implementation - Specific steps to adopt it>. <Time/Money Saved - Quantified benefit when possible>. <Personal Impact - How it improves daily life>
         - Focus on: time management, organization, health optimization, habit formation
 
         ## 🚀 ACTIONABLE CHALLENGES
@@ -494,7 +491,7 @@ class PersonalGrowthAggregator:
         - NO repetition across sections - each insight appears once in the most logical section
         - Every item must be ACTIONABLE - readers should know exactly what to do
         - Include specific numbers, percentages, timeframes, and dollar amounts when available
-        - Include URLs only in Financial Moves and Community sections
+        - Include URLs only in Financial Moves and Community sections (optimize url names example: [Reddit r/personalfinance](...))
         - Focus on practical implementation, not theory
         - Make insights accessible to beginners but valuable to advanced users
 
