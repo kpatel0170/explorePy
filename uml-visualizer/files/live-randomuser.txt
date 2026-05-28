@@ -1,0 +1,6 @@
+@startuml 
+object Erik_Crawford 
+Erik_Crawford : email = erik.crawford@example.com
+Erik_Crawford : phone = (724) 661-4062
+Erik_Crawford : age = 53
+@enduml 
