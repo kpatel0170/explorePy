@@ -1,6 +1,6 @@
 [project]
 name = "esri"
-version = "0.1.0"
+version = "0.2.0"
 description = "Utility toolkit for ArcGIS Enterprise (ArcGIS API for Python, pandas/SDF, geopandas, arcpy)"
 requires-python = ">=3.10"
 dependencies = [
