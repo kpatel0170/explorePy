@@ -1,57 +1,64 @@
 from turtle import Screen
+import time
+
 from snake import Snake
 from food import Food
 from scoreboard import ScoreBoard
-import time
 
-# Screen
-screen = Screen()
-screen.setup(600, 600)
-screen.bgcolor('black')
-screen.title('Snake Game')
-screen.tracer(0)
 
-# Snake object
-snake = Snake()
+def setup_screen():
+    screen = Screen()
+    screen.setup(600, 600)
+    screen.bgcolor("black")
+    screen.title("Snake Game")
+    screen.tracer(0)
+    return screen
 
-# Food object
-food = Food()
 
-# Scoreboard object
-scoreboard = ScoreBoard()
+def register_controls(screen, snake):
+    screen.listen()
+    screen.onkey(snake.up, "Up")
+    screen.onkey(snake.down, "Down")
+    screen.onkey(snake.left, "Left")
+    screen.onkey(snake.right, "Right")
 
-# Listen to keystrokes
-screen.listen()
-screen.onkey(snake.up, "Up")
-screen.onkey(snake.down, "Down")
-screen.onkey(snake.left, "Left")
-screen.onkey(snake.right, "Right")
 
-game_is_on = True
+def main():
+    screen = setup_screen()
+    snake = Snake()
+    food = Food()
+    scoreboard = ScoreBoard()
 
-while game_is_on:
-    screen.update()
-    time.sleep(0.1)
-    snake.move()
+    register_controls(screen, snake)
 
-    # Detect collision with food
-    if snake.head.distance(food) < 15:
-        scoreboard.increase_score()
-        snake.extend_length()
-        food.refresh()
+    game_is_on = True
+    while game_is_on:
+        screen.update()
+        time.sleep(0.1)
+        snake.move()
 
-    # Detect collision with wall
-    if snake.head.xcor() > 280 or snake.head.xcor() < -280 or snake.head.ycor() > 280 or snake.head.ycor() < -280:
-        scoreboard.reset_scoreboard()
-        snake.reset_snake()
+        if snake.head.distance(food) < 15:
+            scoreboard.increase_score()
+            snake.extend_length()
+            food.refresh()
 
-    # Detect collision with tail
-    for segment in snake.segments[1:]:
-        if segment == snake.head:
-            pass
-        elif snake.head.distance(segment) < 10:
+        if (
+            snake.head.xcor() > 280
+            or snake.head.xcor() < -280
+            or snake.head.ycor() > 280
+            or snake.head.ycor() < -280
+        ):
             scoreboard.reset_scoreboard()
             snake.reset_snake()
 
+        for segment in snake.segments[1:]:
+            if snake.head.distance(segment) < 10:
+                scoreboard.reset_scoreboard()
+                snake.reset_snake()
+                break
 
-screen.exitonclick()
+    screen.exitonclick()
+
+
+if __name__ == "__main__":
+    main()

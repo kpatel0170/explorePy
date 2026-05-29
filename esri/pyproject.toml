@@ -1,0 +1,28 @@
+[project]
+name = "esri"
+version = "0.1.0"
+description = "Utility toolkit for ArcGIS Enterprise (ArcGIS API for Python, pandas/SDF, geopandas, arcpy)"
+requires-python = ">=3.10"
+dependencies = [
+  "arcgis>=2.3",
+  "pandas>=2.0",
+  "geopandas>=0.14",
+  "shapely>=2.0",
+  "matplotlib>=3.7",
+  "streamlit>=1.30",
+  "python-dotenv>=1.0",
+]
+
+# arcpy ships with ArcGIS Pro / Server and is NOT pip/uv-installable.
+# The arcpy_* modules only run inside an ArcGIS Pro conda environment.
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest"]
+# rapidfuzz/usaddress are used by the address-reconciliation workflow (see below)
+addr = ["rapidfuzz>=3.0", "usaddress>=0.5.10"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110

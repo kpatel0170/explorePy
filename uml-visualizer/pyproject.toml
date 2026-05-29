@@ -1,0 +1,9 @@
+[project]
+name = "uml-visualizer"
+version = "0.1.0"
+description = "Generate PlantUML diagrams from sample microservice JSON data"
+requires-python = ">=3.10"
+dependencies = [
+  "plantuml>=0.3.0",
+  "requests",
+]

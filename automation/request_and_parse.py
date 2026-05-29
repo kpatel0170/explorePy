@@ -1,15 +1,16 @@
-# import relevant libraries
 import requests
 from bs4 import BeautifulSoup
 
-# define the url
-url = 'http://quotes.toscrape.com'
+URL = "http://quotes.toscrape.com"
 
-# send a request to get html code from that url
-response = requests.get(url, headers={"Accept": "text/html"})
 
-# parse the response
-parsed_response = BeautifulSoup(response.text, "html.parser")
+def main():
+    response = requests.get(URL, headers={"Accept": "text/html"}, timeout=10)
+    response.raise_for_status()
 
-# format the parsed HTML response in a way that’s easier to read and print it out
-print(parsed_response.prettify())
+    parsed_response = BeautifulSoup(response.text, "html.parser")
+    print(parsed_response.prettify())
+
+
+if __name__ == "__main__":
+    main()

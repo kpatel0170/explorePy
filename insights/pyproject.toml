@@ -1,0 +1,18 @@
+[project]
+name = "insights"
+version = "0.1.0"
+description = "Tech and personal growth insight aggregators"
+requires-python = ">=3.10"
+dependencies = [
+  "requests==2.32.3",
+  "feedparser==6.0.11",
+  "google-generativeai==0.7.2",
+  "google-auth==2.40.3",
+  "google-auth-oauthlib==1.2.1",
+  "google-api-python-client==2.178.0",
+  "python-dotenv==1.0.1",
+  "markdown==3.6",
+  "bleach==6.2.0",
+  "beautifulsoup4==4.12.3",
+  "tinycss2==1.1.0",
+]

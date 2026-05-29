@@ -12,9 +12,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import time
-import json
 import logging
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 import re
 from dataclasses import dataclass
 import os
@@ -23,7 +22,7 @@ from dotenv import load_dotenv
 from markdown import markdown as md_to_html
 import bleach
 from bleach.css_sanitizer import CSSSanitizer
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 
 # Google Gmail API imports
 from google.oauth2.credentials import Credentials
@@ -35,8 +34,11 @@ from googleapiclient.discovery import build
 load_dotenv()
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class InsightItem:
@@ -51,59 +53,127 @@ class InsightItem:
     pub_date: Optional[datetime] = None
     flair: str = ""
 
+
 class PersonalGrowthAggregator:
     def __init__(self, config: Dict):
         """Initialize the aggregator with configuration"""
         self.config = config
         self.setup_gemini()
-        self.brand_logo_url = os.getenv('BRAND_LOGO_URL', '').strip()
+        self.brand_logo_url = os.getenv("BRAND_LOGO_URL", "").strip()
 
         # Enhanced keywords for personal growth and finance
         self.finance_keywords = [
             # Personal Finance Core
-            'budgeting', 'budget', 'savings', 'investment', 'investing', 'portfolio',
-            'retirement', '401k', 'ira', 'roth ira', 'emergency fund', 'debt',
-            'credit score', 'mortgage', 'refinance', 'student loan', 'compound interest',
-            'dividend', 'etf', 'mutual fund', 'index fund', 'stocks', 'bonds',
-
+            "budgeting",
+            "budget",
+            "savings",
+            "investment",
+            "investing",
+            "portfolio",
+            "retirement",
+            "401k",
+            "ira",
+            "roth ira",
+            "emergency fund",
+            "debt",
+            "credit score",
+            "mortgage",
+            "refinance",
+            "student loan",
+            "compound interest",
+            "dividend",
+            "etf",
+            "mutual fund",
+            "index fund",
+            "stocks",
+            "bonds",
             # Wealth Building
-            'wealth building', 'passive income', 'side hustle', 'real estate',
-            'financial independence', 'fire', 'early retirement', 'net worth',
-            'asset allocation', 'diversification', 'tax optimization', 'tax strategy',
-
+            "wealth building",
+            "passive income",
+            "side hustle",
+            "real estate",
+            "financial independence",
+            "fire",
+            "early retirement",
+            "net worth",
+            "asset allocation",
+            "diversification",
+            "tax optimization",
+            "tax strategy",
             # Career & Income
-            'salary negotiation', 'career change', 'promotion', 'raise', 'job search',
-            'freelancing', 'remote work', 'skill development', 'certification',
-            'networking', 'linkedin', 'resume', 'interview',
-
+            "salary negotiation",
+            "career change",
+            "promotion",
+            "raise",
+            "job search",
+            "freelancing",
+            "remote work",
+            "skill development",
+            "certification",
+            "networking",
+            "linkedin",
+            "resume",
+            "interview",
             # Life Skills & Productivity
-            'productivity', 'time management', 'habit formation', 'goal setting',
-            'meal prep', 'organization', 'decluttering', 'minimalism',
-            'health', 'exercise', 'mental health', 'mindfulness', 'meditation',
-
+            "productivity",
+            "time management",
+            "habit formation",
+            "goal setting",
+            "meal prep",
+            "organization",
+            "decluttering",
+            "minimalism",
+            "health",
+            "exercise",
+            "mental health",
+            "mindfulness",
+            "meditation",
             # Money Management
-            'insurance', 'health insurance', 'life insurance', 'bank account',
-            'credit card', 'cashback', 'rewards', 'frugal', 'cost cutting',
-            'grocery budget', 'utilities', 'subscription', 'phone bill'
+            "insurance",
+            "health insurance",
+            "life insurance",
+            "bank account",
+            "credit card",
+            "cashback",
+            "rewards",
+            "frugal",
+            "cost cutting",
+            "grocery budget",
+            "utilities",
+            "subscription",
+            "phone bill",
         ]
 
         # Quality filtering patterns for low-value content
         self.low_quality_patterns = [
-            r'\bmeme\b', r'\bjoke\b', r'\bshitpost\b', r'\bcirclejerk\b',
-            r'\brant\b', r'\bventing\b', r'\boff my chest\b',
-            r'\bupvote if\b', r'\bkarma\b', r'\bfirst post\b'
+            r"\bmeme\b",
+            r"\bjoke\b",
+            r"\bshitpost\b",
+            r"\bcirclejerk\b",
+            r"\brant\b",
+            r"\bventing\b",
+            r"\boff my chest\b",
+            r"\bupvote if\b",
+            r"\bkarma\b",
+            r"\bfirst post\b",
         ]
 
         # Spam domains to filter out
         self.spam_domains = {
-            'twitter.com', 'x.com', 'facebook.com', 'instagram.com', 'tiktok.com',
-            'youtube.com', 'youtu.be', 'linkedin.com'
+            "twitter.com",
+            "x.com",
+            "facebook.com",
+            "instagram.com",
+            "tiktok.com",
+            "youtube.com",
+            "youtu.be",
+            "linkedin.com",
         }
 
     def setup_gemini(self):
         """Configure Google Gemini API"""
-        genai.configure(api_key=self.config['gemini_api_key'])
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        genai.configure(api_key=self.config["gemini_api_key"])
+        self.model = genai.GenerativeModel("gemini-2.0-flash-exp")
 
     def fetch_reddit_insights(self) -> List[InsightItem]:
         """Fetch insights from Reddit personal growth communities"""
@@ -113,56 +183,54 @@ class PersonalGrowthAggregator:
         # Targeted subreddit configuration with quality thresholds
         subreddit_config = [
             # Personal Finance
-            ('personalfinance', 25, 1.2, 'Personal Finance'),
-            ('PersonalFinanceCanada', 20, 1.1, 'Personal Finance'),
-            ('financialindependence', 30, 1.3, 'Wealth Building'),
-            ('investing', 25, 1.1, 'Investing'),
+            ("personalfinance", 25, 1.2, "Personal Finance"),
+            ("PersonalFinanceCanada", 20, 1.1, "Personal Finance"),
+            ("financialindependence", 30, 1.3, "Wealth Building"),
+            ("investing", 25, 1.1, "Investing"),
             # ('SecurityCareer', 15, 0.9, 'Career'),
-            ('povertyfinance', 20, 1.0, 'Personal Finance'),
-            ('Frugal', 15, 0.9, 'Money Saving'),
-
+            ("povertyfinance", 20, 1.0, "Personal Finance"),
+            ("Frugal", 15, 0.9, "Money Saving"),
             # Life Improvement
-            ('LifeProTips', 50, 1.2, 'Life Skills'),
-            ('YouShouldKnow', 30, 1.1, 'Life Skills'),
-            ('productivity', 15, 1.0, 'Productivity'),
+            ("LifeProTips", 50, 1.2, "Life Skills"),
+            ("YouShouldKnow", 30, 1.1, "Life Skills"),
+            ("productivity", 15, 1.0, "Productivity"),
             # ('getmotivated', 20, 0.8, 'Motivation'),
             # ('selfimprovement', 15, 1.0, 'Personal Development'),
             # ('DecidingToBeBetter', 10, 1.0, 'Personal Development'),
             # ('habits', 10, 1.1, 'Habit Formation'),
-
             # Career & Professional
-            ('cscareerquestions', 20, 1.0, 'Career'),
+            ("cscareerquestions", 20, 1.0, "Career"),
             # ('ITCareerQuestions', 15, 0.9, 'Career'),
-            ('entrepreneur', 25, 1.0, 'Business'),
-
+            ("entrepreneur", 25, 1.0, "Business"),
             # Health & Lifestyle
-            ('loseit', 20, 0.8, 'Health'),
-            ('getdisciplined', 15, 1.0, 'Personal Development'),
-            ('minimalism', 15, 0.9, 'Lifestyle'),
-
+            ("loseit", 20, 0.8, "Health"),
+            ("getdisciplined", 15, 1.0, "Personal Development"),
+            ("minimalism", 15, 0.9, "Lifestyle"),
             # Money Specific
             # ('budgetfood', 10, 0.9, 'Money Saving'),
             # ('couponsharing', 5, 0.7, 'Money Saving'),
-            ('beermoney', 10, 0.8, 'Side Income'),
-            ('sidehustle', 15, 1.0, 'Side Income'),
+            ("beermoney", 10, 0.8, "Side Income"),
+            ("sidehustle", 15, 1.0, "Side Income"),
         ]
 
         try:
             for subreddit, min_score, quality_multiplier, category in subreddit_config:
                 try:
                     # Fetch from multiple sorting methods for better coverage
-                    sort_methods = ['hot', 'top', 'rising']
+                    sort_methods = ["hot", "top", "rising"]
 
                     for sort_method in sort_methods:
-                        time_param = '&t=day' if sort_method == 'top' else ''
+                        time_param = "&t=day" if sort_method == "top" else ""
                         url = f"https://www.reddit.com/r/{subreddit}/{sort_method}.json?limit=10{time_param}"
-                        headers = {'User-Agent': 'PersonalGrowthAggregator/1.0'}
+                        headers = {"User-Agent": "PersonalGrowthAggregator/1.0"}
 
                         response = requests.get(url, headers=headers, timeout=10)
 
                         # Handle rate limiting
                         if response.status_code in (429, 403):
-                            logger.warning(f"Reddit rate limit for r/{subreddit}, backing off 3s")
+                            logger.warning(
+                                f"Reddit rate limit for r/{subreddit}, backing off 3s"
+                            )
                             time.sleep(3)
                             continue
 
@@ -172,37 +240,46 @@ class PersonalGrowthAggregator:
                             logger.warning(f"Non-JSON response for r/{subreddit}")
                             continue
 
-                        children = data.get('data', {}).get('children', [])
+                        children = data.get("data", {}).get("children", [])
                         if not children:
                             continue
 
                         for post in children[:5]:  # Top 5 per sort method
-                            post_data = post['data']
+                            post_data = post["data"]
 
                             # Enhanced quality filtering
-                            if (not post_data.get('stickied', False) and
-                                not post_data.get('is_self', False) or
-                                len(post_data.get('selftext', '')) > 100) and \
-                                post_data.get('score', 0) >= min_score and \
-                                not self._is_spam_domain(post_data.get('url', '')) and \
-                                not post_data.get('over_18', False):
-
+                            if (
+                                (
+                                    not post_data.get("stickied", False)
+                                    and not post_data.get("is_self", False)
+                                    or len(post_data.get("selftext", "")) > 100
+                                )
+                                and post_data.get("score", 0) >= min_score
+                                and not self._is_spam_domain(post_data.get("url", ""))
+                                and not post_data.get("over_18", False)
+                            ):
                                 # Get comprehensive summary
                                 summary = self._extract_reddit_summary(post_data)
 
                                 # Check if content is relevant
-                                if self._is_growth_related(post_data['title'], summary):
+                                if self._is_growth_related(post_data["title"], summary):
                                     item = InsightItem(
-                                        title=post_data['title'],
-                                        url=post_data.get('url', f"https://reddit.com{post_data['permalink']}"),
+                                        title=post_data["title"],
+                                        url=post_data.get(
+                                            "url",
+                                            f"https://reddit.com{post_data['permalink']}",
+                                        ),
                                         summary=summary,
                                         source=f"Reddit r/{subreddit}",
-                                        score=post_data.get('score', 0),
-                                        comments=post_data.get('num_comments', 0),
-                                        quality_score=quality_multiplier * (1 + post_data.get('score', 0) / 500),
+                                        score=post_data.get("score", 0),
+                                        comments=post_data.get("num_comments", 0),
+                                        quality_score=quality_multiplier
+                                        * (1 + post_data.get("score", 0) / 500),
                                         category=category,
-                                        flair=post_data.get('link_flair_text', ''),
-                                        pub_date=datetime.fromtimestamp(post_data.get('created_utc', 0))
+                                        flair=post_data.get("link_flair_text", ""),
+                                        pub_date=datetime.fromtimestamp(
+                                            post_data.get("created_utc", 0)
+                                        ),
                                     )
 
                                     if self._passes_quality_filter(item):
@@ -230,12 +307,42 @@ class PersonalGrowthAggregator:
         # Popular finance blogs with RSS feeds
         blog_feeds = [
             ("https://www.bogleheads.org/blog/feed/", "Bogleheads", 1.4, "Investing"),
-            ("https://awealthofcommonsense.com/feed/", "A Wealth of Common Sense", 1.4, "Investing"),
-            ("https://www.mrmoneymustache.com/feed/", "Mr. Money Mustache", 1.3, "Financial Independence"),
-            ("https://www.financialsamurai.com/feed/", "Financial Samurai", 1.3, "Personal Finance"),
-            ("https://www.madfientist.com/feed/", "Mad Fientist", 1.3, "Financial Independence"),
-            ("https://ofdollarsanddata.com/feed/", "Of Dollars and Data", 1.4, "Data-Driven Investing"),
-            ("https://humbledollar.com/feed/", "Humble Dollar", 1.3, "Personal Finance"),
+            (
+                "https://awealthofcommonsense.com/feed/",
+                "A Wealth of Common Sense",
+                1.4,
+                "Investing",
+            ),
+            (
+                "https://www.mrmoneymustache.com/feed/",
+                "Mr. Money Mustache",
+                1.3,
+                "Financial Independence",
+            ),
+            (
+                "https://www.financialsamurai.com/feed/",
+                "Financial Samurai",
+                1.3,
+                "Personal Finance",
+            ),
+            (
+                "https://www.madfientist.com/feed/",
+                "Mad Fientist",
+                1.3,
+                "Financial Independence",
+            ),
+            (
+                "https://ofdollarsanddata.com/feed/",
+                "Of Dollars and Data",
+                1.4,
+                "Data-Driven Investing",
+            ),
+            (
+                "https://humbledollar.com/feed/",
+                "Humble Dollar",
+                1.3,
+                "Personal Finance",
+            ),
         ]
 
         try:
@@ -246,10 +353,16 @@ class PersonalGrowthAggregator:
                     feed = feedparser.parse(feed_url)
 
                     for entry in feed.entries[:5]:  # Top 5 per feed
-                        pub_date = datetime(*entry.published_parsed[:6]) if hasattr(entry, 'published_parsed') else datetime.now()
+                        pub_date = (
+                            datetime(*entry.published_parsed[:6])
+                            if hasattr(entry, "published_parsed")
+                            else datetime.now()
+                        )
 
                         if pub_date >= cutoff_date:
-                            summary = self._clean_html(entry.get('summary', '') or entry.get('description', ''))
+                            summary = self._clean_html(
+                                entry.get("summary", "") or entry.get("description", "")
+                            )
 
                             item = InsightItem(
                                 title=entry.title,
@@ -258,7 +371,7 @@ class PersonalGrowthAggregator:
                                 source=source_name,
                                 pub_date=pub_date,
                                 quality_score=quality_multiplier,
-                                category=category
+                                category=category,
                             )
 
                             if self._passes_quality_filter(item):
@@ -282,12 +395,37 @@ class PersonalGrowthAggregator:
         insights = []
 
         lifestyle_feeds = [
-            ("https://zenhabits.net/feed/", "Zen Habits", 1.3, "Mindfulness & Simplicity"),
+            (
+                "https://zenhabits.net/feed/",
+                "Zen Habits",
+                1.3,
+                "Mindfulness & Simplicity",
+            ),
             ("https://jamesclear.com/feed", "James Clear", 1.5, "Habit Formation"),
-            ("https://calnewport.com/feed/", "Cal Newport", 1.4, "Deep Work & Productivity"),
-            ("https://www.becomingminimalist.com/feed/", "Becoming Minimalist", 1.2, "Minimalism & Lifestyle"),
-            ("https://matthewgmiller.com/feed/", "Matt D'Avella", 1.2, "Minimalism & Habits"),
-            ("https://alistapart.com/main/feed/", "A List Apart", 1.2, "Work & Creativity"),
+            (
+                "https://calnewport.com/feed/",
+                "Cal Newport",
+                1.4,
+                "Deep Work & Productivity",
+            ),
+            (
+                "https://www.becomingminimalist.com/feed/",
+                "Becoming Minimalist",
+                1.2,
+                "Minimalism & Lifestyle",
+            ),
+            (
+                "https://matthewgmiller.com/feed/",
+                "Matt D'Avella",
+                1.2,
+                "Minimalism & Habits",
+            ),
+            (
+                "https://alistapart.com/main/feed/",
+                "A List Apart",
+                1.2,
+                "Work & Creativity",
+            ),
         ]
 
         try:
@@ -298,10 +436,16 @@ class PersonalGrowthAggregator:
                     feed = feedparser.parse(feed_url)
 
                     for entry in feed.entries[:6]:  # Top 6 per feed
-                        pub_date = datetime(*entry.published_parsed[:6]) if hasattr(entry, 'published_parsed') else datetime.now()
+                        pub_date = (
+                            datetime(*entry.published_parsed[:6])
+                            if hasattr(entry, "published_parsed")
+                            else datetime.now()
+                        )
 
                         if pub_date >= cutoff_date:
-                            summary = self._clean_html(entry.get('summary', '') or entry.get('description', ''))
+                            summary = self._clean_html(
+                                entry.get("summary", "") or entry.get("description", "")
+                            )
 
                             # Check if content is actionable
                             if self._is_actionable_content(entry.title, summary):
@@ -312,7 +456,7 @@ class PersonalGrowthAggregator:
                                     source=source_name,
                                     pub_date=pub_date,
                                     quality_score=quality_multiplier,
-                                    category=category
+                                    category=category,
                                 )
 
                                 if self._passes_quality_filter(item):
@@ -341,13 +485,13 @@ class PersonalGrowthAggregator:
 
         # Pattern matching for growth concepts
         growth_patterns = [
-            r'\b(how to|ways to|tips for|guide to|steps to)\b',
-            r'\b(save money|make money|build wealth|increase income)\b',
-            r'\b(improve|better|optimize|maximize|minimize)\b',
-            r'\b(budget|debt|credit|investment|retirement)\b',
-            r'\b(productivity|efficiency|organization|planning)\b',
-            r'\b(habit|routine|discipline|motivation)\b',
-            r'\b(career|job|salary|promotion|skill)\b'
+            r"\b(how to|ways to|tips for|guide to|steps to)\b",
+            r"\b(save money|make money|build wealth|increase income)\b",
+            r"\b(improve|better|optimize|maximize|minimize)\b",
+            r"\b(budget|debt|credit|investment|retirement)\b",
+            r"\b(productivity|efficiency|organization|planning)\b",
+            r"\b(habit|routine|discipline|motivation)\b",
+            r"\b(career|job|salary|promotion|skill)\b",
         ]
 
         for pattern in growth_patterns:
@@ -361,9 +505,21 @@ class PersonalGrowthAggregator:
         text = (title + " " + summary).lower()
 
         actionable_indicators = [
-            'how to', 'ways to', 'steps to', 'guide to', 'tips for',
-            'you should', 'you can', 'try this', 'method', 'strategy',
-            'technique', 'approach', 'system', 'framework', 'process'
+            "how to",
+            "ways to",
+            "steps to",
+            "guide to",
+            "tips for",
+            "you should",
+            "you can",
+            "try this",
+            "method",
+            "strategy",
+            "technique",
+            "approach",
+            "system",
+            "framework",
+            "process",
         ]
 
         return any(indicator in text for indicator in actionable_indicators)
@@ -386,7 +542,13 @@ class PersonalGrowthAggregator:
             return False
 
         # Filter out overly promotional content
-        promotional_words = ['buy now', 'click here', 'limited time', 'special offer', 'discount code']
+        promotional_words = [
+            "buy now",
+            "click here",
+            "limited time",
+            "special offer",
+            "discount code",
+        ]
         if any(word in title_lower for word in promotional_words):
             return False
 
@@ -396,42 +558,48 @@ class PersonalGrowthAggregator:
         """Check if URL is from a spam domain"""
         try:
             domain = urlparse(url).netloc.lower()
-            domain = re.sub(r'^www\.', '', domain)
+            domain = re.sub(r"^www\.", "", domain)
             return domain in self.spam_domains
         except Exception:
             return False
 
     def _extract_reddit_summary(self, post_data: Dict) -> str:
         """Extract comprehensive summary from Reddit posts"""
-        selftext = post_data.get('selftext', '')
+        selftext = post_data.get("selftext", "")
 
         # For self posts with substantial content
         if selftext and len(selftext) > 100:
             # Clean markdown formatting
-            clean_text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', selftext)
-            clean_text = re.sub(r'[*_`]+', '', clean_text)
-            clean_text = re.sub(r'\n+', ' ', clean_text)
-            clean_text = re.sub(r'\s+', ' ', clean_text)
+            clean_text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", selftext)
+            clean_text = re.sub(r"[*_`]+", "", clean_text)
+            clean_text = re.sub(r"\n+", " ", clean_text)
+            clean_text = re.sub(r"\s+", " ", clean_text)
 
             # Extract key points if it's a long post
             if len(clean_text) > 800:
-                sentences = clean_text.split('.')
-                key_sentences = [s.strip() for s in sentences[:4] if len(s.strip()) > 20]
-                return '. '.join(key_sentences) + '...' if key_sentences else clean_text[:400] + '...'
+                sentences = clean_text.split(".")
+                key_sentences = [
+                    s.strip() for s in sentences[:4] if len(s.strip()) > 20
+                ]
+                return (
+                    ". ".join(key_sentences) + "..."
+                    if key_sentences
+                    else clean_text[:400] + "..."
+                )
 
-            return clean_text[:600] + '...' if len(clean_text) > 600 else clean_text
+            return clean_text[:600] + "..." if len(clean_text) > 600 else clean_text
 
         # For link posts, use title as summary
-        return post_data.get('title', '')[:300]
+        return post_data.get("title", "")[:300]
 
     def _clean_html(self, text: str) -> str:
         """Remove HTML tags and clean text"""
         if not text:
             return ""
-        clean = re.compile('<.*?>')
-        text = re.sub(clean, '', text)
-        text = re.sub(r'\s+', ' ', text)
-        text = re.sub(r'\n+', ' ', text)
+        clean = re.compile("<.*?>")
+        text = re.sub(clean, "", text)
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\n+", " ", text)
         return text.strip()
 
     def generate_insights_summary(self, insights: List[InsightItem]) -> str:
@@ -504,7 +672,9 @@ class PersonalGrowthAggregator:
             input_tokens = None
             try:
                 ct = self.model.count_tokens(prompt)
-                input_tokens = getattr(ct, 'total_tokens', None) or getattr(ct, 'token_count', None)
+                input_tokens = getattr(ct, "total_tokens", None) or getattr(
+                    ct, "token_count", None
+                )
             except Exception:
                 input_tokens = None
 
@@ -514,16 +684,20 @@ class PersonalGrowthAggregator:
             output_tokens = None
             total_tokens = None
             try:
-                um = getattr(response, 'usage_metadata', None)
+                um = getattr(response, "usage_metadata", None)
                 if um:
-                    output_tokens = getattr(um, 'output_token_count', None) or getattr(um, 'candidates_token_count', None)
+                    output_tokens = getattr(um, "output_token_count", None) or getattr(
+                        um, "candidates_token_count", None
+                    )
                     if input_tokens is None:
-                        input_tokens = getattr(um, 'input_token_count', None)
-                    total_tokens = getattr(um, 'total_token_count', None)
+                        input_tokens = getattr(um, "input_token_count", None)
+                    total_tokens = getattr(um, "total_token_count", None)
             except Exception:
                 pass
 
-            if total_tokens is None and (input_tokens is not None or output_tokens is not None):
+            if total_tokens is None and (
+                input_tokens is not None or output_tokens is not None
+            ):
                 total_tokens = (input_tokens or 0) + (output_tokens or 0)
 
             logger.info(
@@ -546,17 +720,35 @@ class PersonalGrowthAggregator:
         for item in insights:
             base_score = item.quality_score
             engagement_boost = (item.score + item.comments * 1.5) / 300
-            recency_boost = 0.2 if item.pub_date and (datetime.now() - item.pub_date).days <= 1 else 0
+            recency_boost = (
+                0.2
+                if item.pub_date and (datetime.now() - item.pub_date).days <= 1
+                else 0
+            )
 
             # Boost for actionable content
             actionability_boost = 0
             title_lower = item.title.lower()
-            if any(word in title_lower for word in ['how to', 'ways to', 'tips', 'guide', 'strategy']):
+            if any(
+                word in title_lower
+                for word in ["how to", "ways to", "tips", "guide", "strategy"]
+            ):
                 actionability_boost += 0.3
-            if any(word in title_lower for word in ['save money', 'make money', 'increase', 'improve', 'optimize']):
+            if any(
+                word in title_lower
+                for word in [
+                    "save money",
+                    "make money",
+                    "increase",
+                    "improve",
+                    "optimize",
+                ]
+            ):
                 actionability_boost += 0.2
 
-            item.quality_score = base_score + engagement_boost + recency_boost + actionability_boost
+            item.quality_score = (
+                base_score + engagement_boost + recency_boost + actionability_boost
+            )
 
         # Sort by quality score descending
         return sorted(insights, key=lambda x: x.quality_score, reverse=True)
@@ -570,16 +762,25 @@ class PersonalGrowthAggregator:
         # Group by category for better organization
         categories = {}
         for item in insights[:100]:  # Top 100 insights
-            category = item.category or 'General'
+            category = item.category or "General"
             if category not in categories:
                 categories[category] = []
             categories[category].append(item)
 
         # Priority order for categories
         priority_order = [
-            'Personal Finance', 'Wealth Building', 'Investing', 'Career',
-            'Life Skills', 'Productivity', 'Personal Development', 'Money Saving',
-            'Side Income', 'Health', 'Lifestyle', 'General'
+            "Personal Finance",
+            "Wealth Building",
+            "Investing",
+            "Career",
+            "Life Skills",
+            "Productivity",
+            "Personal Development",
+            "Money Saving",
+            "Side Income",
+            "Health",
+            "Lifestyle",
+            "General",
         ]
 
         # Output in priority order
@@ -601,12 +802,32 @@ class PersonalGrowthAggregator:
 
     def _dedupe_insights(self, insights: List[InsightItem]) -> List[InsightItem]:
         """Remove duplicate insights with improved similarity detection"""
+
         def normalize_title(title: str) -> str:
             t = title.lower()
             t = re.sub(r"[^a-z0-9\s]", "", t)
             t = re.sub(r"\s+", " ", t).strip()
             # Remove common words
-            stop_words = ['lpt', 'ysk', 'tip', 'how', 'to', 'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'for', 'of', 'with', 'by']
+            stop_words = [
+                "lpt",
+                "ysk",
+                "tip",
+                "how",
+                "to",
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "for",
+                "of",
+                "with",
+                "by",
+            ]
             words = [w for w in t.split() if w not in stop_words and len(w) > 2]
             return " ".join(words)
 
@@ -620,11 +841,16 @@ class PersonalGrowthAggregator:
 
             # Skip if we've seen very similar title or exact URL
             title_similar = any(
-                len(set(title_key.split()) & set(seen.split())) > max(len(title_key.split()) * 0.7, 2)
+                len(set(title_key.split()) & set(seen.split()))
+                > max(len(title_key.split()) * 0.7, 2)
                 for seen in seen_titles
             )
 
-            if not title_similar and url_key not in seen_urls and len(title_key.split()) >= 2:
+            if (
+                not title_similar
+                and url_key not in seen_urls
+                and len(title_key.split()) >= 2
+            ):
                 seen_titles.add(title_key)
                 seen_urls.add(url_key)
                 unique_insights.append(item)
@@ -672,11 +898,13 @@ class PersonalGrowthAggregator:
             "WEALTH BUILDING STRATEGIES": "📈",
             "PRODUCTIVITY & LIFE OPTIMIZATION": "🧠",
             "ACTIONABLE CHALLENGES": "🚀",
-            "COMMUNITY WISDOM": "💬"
+            "COMMUNITY WISDOM": "💬",
         }
 
         # Generate header with current date
-        output = [f"# 📊 Personal Growth & Finance Insights - {datetime.now().strftime('%Y-%m-%d')}\n"]
+        output = [
+            f"# 📊 Personal Growth & Finance Insights - {datetime.now().strftime('%Y-%m-%d')}\n"
+        ]
 
         # Build final output with proper sections
         for section_name in allowed:
@@ -702,8 +930,14 @@ class PersonalGrowthAggregator:
 
         # Priority categories for fallback
         priority_categories = [
-            "Personal Finance", "Wealth Building", "Career", "Investing",
-            "Life Skills", "Productivity", "Personal Development", "Money Saving"
+            "Personal Finance",
+            "Wealth Building",
+            "Career",
+            "Investing",
+            "Life Skills",
+            "Productivity",
+            "Personal Development",
+            "Money Saving",
         ]
 
         for category in priority_categories:
@@ -724,7 +958,7 @@ class PersonalGrowthAggregator:
         """Load or fetch Gmail API OAuth2 credentials"""
         scopes = [
             "https://www.googleapis.com/auth/gmail.send",
-            "https://www.googleapis.com/auth/gmail.readonly"
+            "https://www.googleapis.com/auth/gmail.readonly",
         ]
         creds: Optional[Credentials] = None
 
@@ -751,7 +985,9 @@ class PersonalGrowthAggregator:
                     token_file.write(creds.to_json())
                 return creds
             except Exception as e:
-                logger.error(f"Failed to refresh Gmail credentials from GMAIL_REFRESH_TOKEN: {e}")
+                logger.error(
+                    f"Failed to refresh Gmail credentials from GMAIL_REFRESH_TOKEN: {e}"
+                )
 
         if os.path.exists(token_path):
             creds = Credentials.from_authorized_user_file(token_path, scopes)
@@ -762,7 +998,9 @@ class PersonalGrowthAggregator:
             else:
                 # Build client config inline from Client ID/Secret
                 client_id = env_client_id or self.config.get("gmail_client_id")
-                client_secret = env_client_secret or self.config.get("gmail_client_secret")
+                client_secret = env_client_secret or self.config.get(
+                    "gmail_client_secret"
+                )
                 if not client_id or not client_secret:
                     raise RuntimeError("Missing GMAIL_CLIENT_ID or GMAIL_CLIENT_SECRET")
 
@@ -777,9 +1015,13 @@ class PersonalGrowthAggregator:
                 }
 
                 flow = InstalledAppFlow.from_client_config(client_config, scopes)
-                auth_mode = (self.config.get("gmail_auth_mode") or "localserver").lower()
+                auth_mode = (
+                    self.config.get("gmail_auth_mode") or "localserver"
+                ).lower()
                 if auth_mode == "console":
-                    logger.warning("GMAIL_AUTH_MODE=console is deprecated; using localserver with open_browser=False")
+                    logger.warning(
+                        "GMAIL_AUTH_MODE=console is deprecated; using localserver with open_browser=False"
+                    )
                     creds = flow.run_local_server(
                         port=0,
                         open_browser=False,
@@ -800,7 +1042,7 @@ class PersonalGrowthAggregator:
         logger.info("Sending insights email via Gmail API...")
 
         try:
-            recipient = (self.config.get('recipient_email') or '').strip()
+            recipient = (self.config.get("recipient_email") or "").strip()
             if not recipient:
                 logger.warning("Skipping email: recipient_email not configured.")
                 return
@@ -810,19 +1052,25 @@ class PersonalGrowthAggregator:
             service = build("gmail", "v1", credentials=creds, cache_discovery=False)
 
             # Build MIME message
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = f"📊 Personal Growth & Finance Insights - {datetime.now().strftime('%B %d, %Y')}"
-            msg['From'] = self.config.get('smtp_username') or self.config.get('sender_email') or "me"
-            msg['To'] = recipient
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = (
+                f"📊 Personal Growth & Finance Insights - {datetime.now().strftime('%B %d, %Y')}"
+            )
+            msg["From"] = (
+                self.config.get("smtp_username")
+                or self.config.get("sender_email")
+                or "me"
+            )
+            msg["To"] = recipient
 
             html_content = self._convert_to_html(summary)
-            text_part = MIMEText(summary, 'plain', 'utf-8')
-            html_part = MIMEText(html_content, 'html', 'utf-8')
+            text_part = MIMEText(summary, "plain", "utf-8")
+            html_part = MIMEText(html_content, "html", "utf-8")
             msg.attach(text_part)
             msg.attach(html_part)
 
             # Encode and send message
-            raw = base64.urlsafe_b64encode(msg.as_bytes()).decode('utf-8')
+            raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
             body = {"raw": raw}
 
             # Send with retry logic
@@ -836,8 +1084,10 @@ class PersonalGrowthAggregator:
                     attempts += 1
                     if attempts >= 3:
                         raise send_err
-                    sleep_for = 2 ** attempts
-                    logger.warning(f"Send failed (attempt {attempts}), retrying in {sleep_for}s...")
+                    sleep_for = 2**attempts
+                    logger.warning(
+                        f"Send failed (attempt {attempts}), retrying in {sleep_for}s..."
+                    )
                     time.sleep(sleep_for)
 
         except Exception as e:
@@ -849,37 +1099,79 @@ class PersonalGrowthAggregator:
         body_html = md_to_html(
             summary,
             extensions=[
-                'extra',
-                'sane_lists',
-                'nl2br',
-                'codehilite',
+                "extra",
+                "sane_lists",
+                "nl2br",
+                "codehilite",
             ],
-            output_format='html5',
+            output_format="html5",
         )
 
         # Sanitize HTML
-        allowed_tags = bleach.sanitizer.ALLOWED_TAGS.union({
-            'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-            'pre', 'code', 'blockquote', 'hr', 'br',
-            'ul', 'ol', 'li', 'strong', 'em', 'table',
-            'thead', 'tbody', 'tr', 'th', 'td', 'div'
-        })
+        allowed_tags = bleach.sanitizer.ALLOWED_TAGS.union(
+            {
+                "p",
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "pre",
+                "code",
+                "blockquote",
+                "hr",
+                "br",
+                "ul",
+                "ol",
+                "li",
+                "strong",
+                "em",
+                "table",
+                "thead",
+                "tbody",
+                "tr",
+                "th",
+                "td",
+                "div",
+            }
+        )
         allowed_attrs = {
             **bleach.sanitizer.ALLOWED_ATTRIBUTES,
-            'a': ['href', 'title'],
-            'img': ['src', 'alt', 'title', 'width', 'height', 'style'],
-            'div': ['style', 'class'],
-            'span': ['style', 'class'],
-            'p': ['style'],
-            'h1': ['style'], 'h2': ['style'], 'h3': ['style']
+            "a": ["href", "title"],
+            "img": ["src", "alt", "title", "width", "height", "style"],
+            "div": ["style", "class"],
+            "span": ["style", "class"],
+            "p": ["style"],
+            "h1": ["style"],
+            "h2": ["style"],
+            "h3": ["style"],
         }
 
         # Configure CSS sanitizer to allow a safe subset of inline styles
         css_sanitizer = CSSSanitizer(
             allowed_css_properties={
-                'color','background','background-color','padding','margin','border','border-color','border-style','border-width',
-                'font-size','font-weight','text-decoration','display','gap','align-items','vertical-align','line-height',
-                'border-radius','box-shadow','width','height'
+                "color",
+                "background",
+                "background-color",
+                "padding",
+                "margin",
+                "border",
+                "border-color",
+                "border-style",
+                "border-width",
+                "font-size",
+                "font-weight",
+                "text-decoration",
+                "display",
+                "gap",
+                "align-items",
+                "vertical-align",
+                "line-height",
+                "border-radius",
+                "box-shadow",
+                "width",
+                "height",
             },
             allowed_svg_properties=set(),
         )
@@ -897,7 +1189,8 @@ class PersonalGrowthAggregator:
         logo_html = (
             f'<img src="{self.brand_logo_url}" alt="Logo" width="32" height="32" '
             f'style="display:inline-block;border-radius:8px;margin-right:12px;vertical-align:middle;" />'
-            if self.brand_logo_url else '📊'
+            if self.brand_logo_url
+            else "📊"
         )
 
         template = f"""
@@ -915,7 +1208,7 @@ class PersonalGrowthAggregator:
                   {logo_html}
                   <div>
                     <h1 style="margin:0 0 8px 0;font-size:28px;font-weight:700;">Personal Growth & Finance Insights</h1>
-                    <div style="font-size:16px;opacity:0.9;">{datetime.now().strftime('%B %d, %Y')}</div>
+                    <div style="font-size:16px;opacity:0.9;">{datetime.now().strftime("%B %d, %Y")}</div>
                   </div>
                 </div>
               </div>
@@ -1019,15 +1312,18 @@ class PersonalGrowthAggregator:
 
             # Optional: Save summary to file
             summary_file = f"insights_summary_{datetime.now().strftime('%Y%m%d')}.md"
-            with open(summary_file, 'w', encoding='utf-8') as f:
+            with open(summary_file, "w", encoding="utf-8") as f:
                 f.write(summary)
             logger.info(f"Insights summary saved to {summary_file}")
 
-            logger.info("Personal growth & finance insights aggregation completed successfully!")
+            logger.info(
+                "Personal growth & finance insights aggregation completed successfully!"
+            )
 
         except Exception as e:
             logger.error(f"Error in insights aggregation process: {e}")
             raise
+
 
 def main():
     """Main execution function"""
@@ -1035,22 +1331,20 @@ def main():
     # Enhanced configuration for personal growth aggregator
     config = {
         # Gmail API OAuth
-        'gmail_client_id': os.getenv('GMAIL_CLIENT_ID'),
-        'gmail_client_secret': os.getenv('GMAIL_CLIENT_SECRET'),
-        'gmail_token_path': os.getenv('GMAIL_TOKEN_FILE', 'token.json'),
-        'gmail_auth_mode': os.getenv('GMAIL_AUTH_MODE', 'localserver'),
-
+        "gmail_client_id": os.getenv("GMAIL_CLIENT_ID"),
+        "gmail_client_secret": os.getenv("GMAIL_CLIENT_SECRET"),
+        "gmail_token_path": os.getenv("GMAIL_TOKEN_FILE", "token.json"),
+        "gmail_auth_mode": os.getenv("GMAIL_AUTH_MODE", "localserver"),
         # Email settings
-        'smtp_username': os.getenv('SMTP_USERNAME', ''),
-        'sender_email': os.getenv('SENDER_EMAIL', ''),
-        'recipient_email': os.getenv('RECIPIENT_EMAIL', 'kartikpatel0170@gmail.com'),
-
+        "smtp_username": os.getenv("SMTP_USERNAME", ""),
+        "sender_email": os.getenv("SENDER_EMAIL", ""),
+        "recipient_email": os.getenv("RECIPIENT_EMAIL", "kartikpatel0170@gmail.com"),
         # API keys
-        'gemini_api_key': os.getenv('GEMINI_API_KEY'),
+        "gemini_api_key": os.getenv("GEMINI_API_KEY"),
     }
 
     # Validate required configuration
-    required_fields = ['gmail_client_id', 'gmail_client_secret', 'gemini_api_key']
+    required_fields = ["gmail_client_id", "gmail_client_secret", "gemini_api_key"]
     missing_fields = [field for field in required_fields if not config.get(field)]
 
     if missing_fields:
@@ -1067,6 +1361,7 @@ def main():
     except Exception as e:
         logger.error(f"Failed to run personal growth aggregator: {e}")
         raise
+
 
 if __name__ == "__main__":
     main()

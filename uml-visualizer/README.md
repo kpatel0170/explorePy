@@ -19,7 +19,7 @@ This project provides a Python-based script that generates UML diagrams using Pl
    ```
 2. Install required dependencies:
    ```bash
-   pip install -r requirements.txt
+   uv sync
    ```
    
 3. Ensure PlantUML is accessible for generating images. This script uses the public PlantUML server.
@@ -37,7 +37,7 @@ Place these files in the `./files/` directory.
 ### Running the Script
 Run the script to generate the UML diagram:
 ```bash
-python main.py
+uv run python main.py
 ```
 
 ### Output
@@ -107,4 +107,3 @@ Feel free to submit issues or pull requests to improve the functionality of this
 ---
 
 Happy diagramming!
-

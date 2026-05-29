@@ -1,0 +1,12 @@
+[project]
+name = "automation"
+version = "0.1.0"
+description = "Standalone automation and scraping scripts"
+requires-python = ">=3.10"
+dependencies = [
+  "requests",
+  "beautifulsoup4",
+  "pandas",
+  "selenium",
+  "camelot-py",
+]
