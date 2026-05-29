@@ -18,6 +18,9 @@ from .config import PortalConfig
 def connect(cfg: PortalConfig | None = None):
     """Return a connected ``arcgis.gis.GIS``.
 
+    Auth priority from *cfg*: profile > api_key > token > PKI > user+pwd.
+    If only URL is set, anonymous access is used.
+
     >>> gis = connect()                 # uses env vars
     >>> gis = connect(PortalConfig(...)) # explicit
     """

@@ -1,6 +1,11 @@
 """End-to-end example: connect -> query -> clean -> analyze -> visualize.
 
-Set ARCGIS_URL / ARCGIS_USER / ARCGIS_PASSWORD (or ARCGIS_PROFILE) first.
+Auth uses env vars (ARCGIS_URL + any of ARCGIS_API_KEY / ARCGIS_USER / ARCGIS_TOKEN / etc).
+
+Run:
+    export ARCGIS_URL=https://gis.example.com/portal
+    export ARCGIS_API_KEY=APKs...
+    python esri/examples/quickstart.py
 """
 
 from __future__ import annotations
@@ -29,7 +34,7 @@ def main() -> None:
 
     # 4. Analyze with geopandas (example: buffer + dissolve).
     gdf = analysis.to_geodataframe(sdf)
-    buffered = analysis.buffer(gdf, distance=500)  # meters in EPSG:3857
+    buffered = analysis.buffer(gdf, distance=500)
     merged = analysis.dissolve(buffered)
 
     # 5. Visualize.

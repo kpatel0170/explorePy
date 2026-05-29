@@ -2,9 +2,10 @@
 
 Modules
 -------
-config         : environment-driven connection settings.
+config         : environment-driven connection settings (supports API key, token, PKI, pwd).
 portal         : connect to Portal/Enterprise; item, user, web map tools.
 layers         : feature layer query -> Spatially Enabled DataFrame (SDF) & edits.
+sdf            : Spatially Enabled DataFrame helpers — construction, ops, export, plot.
 cleaning       : pandas / SDF cleaning helpers.
 analysis       : merges, spatial joins, geopandas analysis.
 geocode        : forward / reverse / batch geocoding.
@@ -23,12 +24,13 @@ functions so importing this package never fails on a machine missing one of
 them.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "config",
     "portal",
     "layers",
+    "sdf",
     "cleaning",
     "analysis",
     "geocode",
