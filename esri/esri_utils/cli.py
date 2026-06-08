@@ -39,6 +39,33 @@ def _print_df(df, max_rows: int = 50) -> None:
         print(f"... ({len(df):,} rows total, showing {max_rows})")
 
 
+def _print_section(title: str, df, max_rows: int = 50) -> None:
+    print(f"\n== {title} ==")
+    _print_df(df, max_rows=max_rows)
+
+
+def _cmd_doctor(args: argparse.Namespace) -> int:
+    from .diagnostics import readiness_report
+
+    report = readiness_report()
+    _print_section("Environment", report["environment"])
+    _print_section("Dependencies", report["dependencies"], max_rows=100)
+
+    if not args.connect:
+        print("\nRun `esri doctor --connect` to test live Portal auth.")
+        return 0
+
+    from .portal import connect
+
+    gis = connect()
+    props = gis.properties
+    user = getattr(props, "user", None)
+    username = getattr(user, "username", "anonymous") if user else "anonymous"
+    name = getattr(props, "name", "") or getattr(props, "portalName", "")
+    print(f"\nConnected to {name or gis.url!r} as {username}")
+    return 0
+
+
 def _cmd_connect_test(args: argparse.Namespace) -> int:
     from .portal import connect
 
@@ -152,6 +179,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("connect-test", help="Connect with env-var auth and print portal/user.")
     p.set_defaults(func=_cmd_connect_test)
+
+    p = sub.add_parser("doctor", help="Print secret-safe env/dependency diagnostics.")
+    p.add_argument("--connect", action="store_true", help="Also test live Portal auth.")
+    p.set_defaults(func=_cmd_doctor)
 
     p = sub.add_parser("search", help="Search Portal content.")
     p.add_argument("query", nargs="?", default="", help="Free-text query (optional).")

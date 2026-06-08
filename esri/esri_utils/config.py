@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from typing import Any
 
 try:
     from dotenv import load_dotenv
@@ -103,3 +104,40 @@ class PortalConfig:
             kwargs["password"] = self.password
 
         return kwargs
+
+    def auth_mode(self) -> str:
+        """Return the selected auth mode without exposing credential values."""
+        if self.profile:
+            return "profile"
+        if self.api_key:
+            return "api_key"
+        if self.token:
+            return "token"
+        if self.cert_file:
+            return "pki"
+        if self.username or self.password:
+            return "user_password"
+        return "anonymous"
+
+    def masked_summary(self) -> dict[str, Any]:
+        """Return a secret-safe config snapshot for diagnostics and support."""
+        return {
+            "url": self.url or "<missing>",
+            "auth_mode": self.auth_mode(),
+            "username": self.username or "",
+            "profile": self.profile or "",
+            "api_key": _mask_secret(self.api_key),
+            "token": _mask_secret(self.token),
+            "cert_file": self.cert_file or "",
+            "key_file": self.key_file or "",
+            "verify_cert": self.verify_cert,
+            "referer": self.referer,
+        }
+
+
+def _mask_secret(value: str | None) -> str:
+    if not value:
+        return ""
+    if len(value) <= 8:
+        return "<set>"
+    return f"{value[:4]}...{value[-4:]}"

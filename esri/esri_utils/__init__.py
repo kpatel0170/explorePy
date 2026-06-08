@@ -15,6 +15,7 @@ geometry       : server-side geometry ops (project, buffer, simplify, hull, etc)
 admin          : ArcGIS Server service & log administration.
 export         : print web maps (PDF/PNG), extract data, create service definitions.
 geoenrich      : GeoEnrichment demographic & landscape data enrichment.
+diagnostics    : secret-safe env/dependency readiness checks.
 arcpy_db       : arcpy database-focused ops (file gdb / SDE / fields).
 arcpy_aprx     : arcpy ArcGIS Pro project (.aprx) / map / layout ops.
 viz            : geopandas + matplotlib visualization helpers.
@@ -41,6 +42,7 @@ __all__ = [
     "admin",
     "export",
     "geoenrich",
+    "diagnostics",
     "arcpy_db",
     "arcpy_aprx",
     "viz",
