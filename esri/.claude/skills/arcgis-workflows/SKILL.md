@@ -10,6 +10,14 @@ moving feature layers into Spatially Enabled DataFrames (SDF), cleaning/analyzin
 geocoding, network analysis, publishing, or server admin. Read `esri/AGENTS.md`
 for hard rules (lazy imports, `_core`, SDF vs GeoDataFrame, arcgis 2.4).
 
+Use companion skills when the task narrows:
+- `arcgis-python-api`: SDK auth/content/layer/map/publish patterns.
+- `arcpy-workflows`: ArcGIS Pro/Server Python, geodatabases, SDE, APRX.
+- `sdf-pandas-geopandas`: SDF, pandas cleaning, GeoDataFrame analysis.
+- `enterprise-portal-workflows`: Enterprise auth, admin, migration, publish.
+- `esri-project-init`: new module/project setup.
+- `esri-utils-best-practices`: simplify/consolidate helper design.
+
 ## Connect
 
 ```python
@@ -91,6 +99,8 @@ old = large/pale background; use `draw_order`/`fill_color`/`fill_alpha` to style
 
 ```bash
 esri connect-test
+esri doctor
+esri doctor --connect
 esri search --type "Feature Service" --owner planning_dept
 esri query <item-id> --where "STATE='CA'" --out ca.csv
 esri geocode "123 Main St"

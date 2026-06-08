@@ -17,6 +17,7 @@ geometry     server-side project, buffer, simplify, hull, relation, coord conver
 admin        ArcGIS Server services, logs, data stores, machines
 export       print web map (PDF/PNG), extract data, create service def
 geoenrich    enrich study areas, standard geo query, reports
+diagnostics  secret-safe env/dependency readiness checks
 arcpy_db     gdb/SDE ops (arcpy-only)
 arcpy_aprx   .aprx repair sources, symbology, export layouts (arcpy-only)
 viz          choropleth, categorical, overlay maps
@@ -108,6 +109,8 @@ standard_geography_query(gis, "US", "USA.County", geoquery="San Diego*")
 
 ```bash
 esri connect-test                                  # after `uv sync`
+esri doctor                                        # env + dependency readiness
+esri doctor --connect                              # also test live Portal auth
 esri search --type "Feature Service" --owner planning_dept
 esri services --folder Hosted
 esri query <item-id> --where "STATE='CA'" --out ca.csv

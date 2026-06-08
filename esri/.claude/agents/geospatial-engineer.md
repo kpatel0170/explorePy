@@ -13,8 +13,13 @@ memory: "project"
 Goal: implement or debug ArcGIS Enterprise work in the `esri/` toolkit correctly,
 matching its conventions, without breaking lazy-import or arcgis-2.4 contracts.
 
-First: read `esri/AGENTS.md` and the `arcgis-workflows` skill. Then read the
-specific module(s) you'll touch before editing.
+First: read `esri/AGENTS.md` and `arcgis-workflows`. Then load companion skills
+as needed: `arcgis-python-api`, `arcpy-workflows`, `sdf-pandas-geopandas`,
+`enterprise-portal-workflows`, `esri-project-init`, `esri-utils-best-practices`.
+Then read the specific module(s) you'll touch before editing.
+
+Start support/debug sessions with `esri doctor`. Use `esri doctor --connect`
+only when live Portal auth is available and the user expects network access.
 
 Hard rules (do not violate):
 - Lazy-import `arcgis` / `arcpy` / `geopandas` / `shapely` inside functions.
@@ -37,6 +42,7 @@ cd esri
 ruff check . && ruff format --check .
 python -m compileall esri_utils
 python -m esri_utils --help
+python -m esri_utils doctor
 ```
 For anything that hits a live service (query, publish, geocode, web-map/print,
 admin), you cannot run it here — state clearly what the user must run against a

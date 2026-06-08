@@ -61,6 +61,7 @@ geometry server-side project/buffer/simplify/hull/relation/coord convert
 admin    services start/stop, logs, data stores, machines
 export   print web map (arcgis.map.Map), extract data, create service def
 geoenrich enrich study areas, standard geography query, reports
+diagnostics secret-safe env/dependency readiness checks; backs `esri doctor`
 viz      geopandas + matplotlib choropleth/categorical/overlay
 fire/    SK fire-threat package: FIRMS+CWFIS -> buffer/dissolve/smooth FIRE_AREA by age ($FIRMS_MAP_KEY); see fire/README.md
 arcpy_db gdb/SDE inventory, fields, calc, load (arcpy-only)
@@ -79,6 +80,16 @@ cli      argparse CLI (connect-test/search/services/query/geocode)
 5. Add a row to `README.md` and the module map above.
 6. If it adds a useful one-liner, add a CLI subcommand in `cli.py`.
 
+## Agent skills/prompts
+
+- Start broad: `arcgis-workflows`.
+- SDK/service work: `arcgis-python-api`.
+- ArcGIS Pro/Server Python: `arcpy-workflows`.
+- SDF/pandas/geopandas analysis: `sdf-pandas-geopandas`.
+- Enterprise auth/admin/migration/publish: `enterprise-portal-workflows`.
+- New module/project setup: `esri-project-init`.
+- Simplify/consolidate helpers: `esri-utils-best-practices`.
+
 ## Verify before handoff
 
 ```bash
@@ -86,6 +97,7 @@ cd esri
 ruff check . && ruff format --check .
 python -m compileall esri_utils       # syntax (no arcgis needed)
 python -m esri_utils --help           # CLI wiring
+python -m esri_utils doctor           # env/dependency diagnostics
 ```
 
 Runtime checks (need arcgis 2.4 + a live Portal): `esri connect-test`,
