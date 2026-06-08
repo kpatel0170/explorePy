@@ -3,7 +3,15 @@
 from __future__ import annotations
 
 
-def choropleth(gdf, column: str, ax=None, cmap: str = "viridis", scheme: str | None = "quantiles", k: int = 5, title: str | None = None):
+def choropleth(
+    gdf,
+    column: str,
+    ax=None,
+    cmap: str = "viridis",
+    scheme: str | None = "quantiles",
+    k: int = 5,
+    title: str | None = None,
+):
     """Thematic map of ``column``. Uses mapclassify scheme if installed."""
     import matplotlib.pyplot as plt
 
