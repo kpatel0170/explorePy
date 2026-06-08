@@ -135,7 +135,8 @@ new-over-old** — older classes form a larger, paler background; the recent
 `fill_alpha` columns make styling turnkey; pass `nested=True` for cumulative
 concentric zones). Set `FIRMS_MAP_KEY` for satellite data
 ([free key](https://firms.modaps.eosdis.nasa.gov/api/)); runs on CWFIS alone
-without it. See `examples/fire_threat_sk.py`.
+without it. Full docs + tuning: **`esri_utils/fire/README.md`**; runnable
+end-to-end script: `python -m esri_utils.fire.example`.
 
 ```bash
 streamlit run esri/apps/streamlit_app.py     # quick UI explorer

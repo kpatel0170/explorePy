@@ -62,7 +62,7 @@ admin    services start/stop, logs, data stores, machines
 export   print web map (arcgis.map.Map), extract data, create service def
 geoenrich enrich study areas, standard geography query, reports
 viz      geopandas + matplotlib choropleth/categorical/overlay
-fire     SK fire-threat: FIRMS+CWFIS -> buffer/dissolve/smooth FIRE_AREA by age ($FIRMS_MAP_KEY)
+fire/    SK fire-threat package: FIRMS+CWFIS -> buffer/dissolve/smooth FIRE_AREA by age ($FIRMS_MAP_KEY); see fire/README.md
 arcpy_db gdb/SDE inventory, fields, calc, load (arcpy-only)
 arcpy_aprx .aprx repair sources, symbology, export layouts (arcpy-only)
 address_recon Optius -> CAR/AM address match (needs --extra addr)
