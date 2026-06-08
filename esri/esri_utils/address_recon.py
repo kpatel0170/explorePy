@@ -24,16 +24,33 @@ from pathlib import Path
 
 import pandas as pd
 
-GEOM_COL = "SHAPE"
+from ._core import GEOM_COL
 
 # Canonical suffix / directional standardization (extend as needed).
 SUFFIX_MAP = {
-    "ST": "STREET", "AVE": "AVENUE", "RD": "ROAD", "BLVD": "BOULEVARD",
-    "DR": "DRIVE", "LN": "LANE", "CT": "COURT", "CRES": "CRESCENT",
-    "PL": "PLACE", "HWY": "HIGHWAY", "TER": "TERRACE", "PKY": "PARKWAY",
+    "ST": "STREET",
+    "AVE": "AVENUE",
+    "RD": "ROAD",
+    "BLVD": "BOULEVARD",
+    "DR": "DRIVE",
+    "LN": "LANE",
+    "CT": "COURT",
+    "CRES": "CRESCENT",
+    "PL": "PLACE",
+    "HWY": "HIGHWAY",
+    "TER": "TERRACE",
+    "PKY": "PARKWAY",
 }
-DIR_MAP = {"N": "NORTH", "S": "SOUTH", "E": "EAST", "W": "WEST",
-           "NE": "NORTHEAST", "NW": "NORTHWEST", "SE": "SOUTHEAST", "SW": "SOUTHWEST"}
+DIR_MAP = {
+    "N": "NORTH",
+    "S": "SOUTH",
+    "E": "EAST",
+    "W": "WEST",
+    "NE": "NORTHEAST",
+    "NW": "NORTHWEST",
+    "SE": "SOUTHEAST",
+    "SW": "SOUTHWEST",
+}
 
 # Registered-plan (urban) lot-block + SK rural ATS / DLS legal descriptions.
 _LOTBLOCK_RE = re.compile(
@@ -128,8 +145,12 @@ def normalize_civic(s: str, mapping: dict[str, str] | None = None) -> dict:
         comps = {"street": " ".join(_standardize_token(t) for t in cleaned.split())}
 
     comps["postal"] = postal
-    key_parts = [comps.get("number", ""), comps.get("predir", ""),
-                 comps.get("street", ""), comps.get("suffix", "")]
+    key_parts = [
+        comps.get("number", ""),
+        comps.get("predir", ""),
+        comps.get("street", ""),
+        comps.get("suffix", ""),
+    ]
     comps["canon_key"] = " ".join(p for p in key_parts if p).strip()
     comps["block_key"] = (postal[:3] or comps.get("street", "")[:4]).strip()
     return comps
@@ -157,16 +178,28 @@ def normalize_lotblock(s: str) -> dict:
     if ats:
         qtr, sec, twp, rge, mer = (g or "" for g in ats.groups())
         return {
-            "quarter": qtr, "section": sec, "township": twp, "range": rge, "meridian": mer,
-            "lot": "", "block": "", "plan": "",
+            "quarter": qtr,
+            "section": sec,
+            "township": twp,
+            "range": rge,
+            "meridian": mer,
+            "lot": "",
+            "block": "",
+            "plan": "",
             "canon_key": f"QTR {qtr} SEC {sec} TWP {twp} RGE {rge} MER {mer}".strip(),
             "block_key": f"{twp}-{rge}",
         }
 
     lot, block, plan = grab("LOT"), grab("BL?O?CK"), grab("PLAN")
     return {
-        "lot": lot, "block": block, "plan": plan,
-        "quarter": "", "section": "", "township": "", "range": "", "meridian": "",
+        "lot": lot,
+        "block": block,
+        "plan": plan,
+        "quarter": "",
+        "section": "",
+        "township": "",
+        "range": "",
+        "meridian": "",
         "canon_key": f"PLAN {plan} BLOCK {block} LOT {lot}".strip(),
         "block_key": plan or block,
     }
@@ -240,16 +273,14 @@ def reconcile(
         # Tier 1: exact canonical-key match.
         if key in exact_index.index:
             m = exact_index.loc[key]
-            rec.update(match_type="exact", score=100,
-                       matched_addr=m[ref_addr], status="auto-accept")
+            rec.update(match_type="exact", score=100, matched_addr=m[ref_addr], status="auto-accept")
             if GEOM_COL in r.columns:
                 rec[f"{ref_label}_{GEOM_COL}"] = m.get(GEOM_COL)
             results.append(rec)
             continue
 
         # Tier 2: fuzzy within same address type + same block (cheap candidates).
-        cand = r_valid[(r_valid["addr_type"] == atype) &
-                       (r_valid["block_key"] == row["block_key"])]
+        cand = r_valid[(r_valid["addr_type"] == atype) & (r_valid["block_key"] == row["block_key"])]
         if cand.empty:
             cand = r_valid[r_valid["addr_type"] == atype]
         if not cand.empty:
@@ -258,9 +289,12 @@ def reconcile(
                 cand_key, score, pos = best
                 if score >= fuzzy_threshold:
                     m = cand.iloc[pos]
-                    rec.update(match_type="fuzzy", score=int(score),
-                               matched_addr=m[ref_addr],
-                               status="auto-accept" if score >= 95 else "review")
+                    rec.update(
+                        match_type="fuzzy",
+                        score=int(score),
+                        matched_addr=m[ref_addr],
+                        status="auto-accept" if score >= 95 else "review",
+                    )
                     if GEOM_COL in r.columns:
                         rec[f"{ref_label}_{GEOM_COL}"] = m.get(GEOM_COL)
         results.append(rec)

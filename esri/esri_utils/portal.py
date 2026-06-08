@@ -83,16 +83,26 @@ def list_users(gis, max_users: int = 1000) -> pd.DataFrame:
 
 
 def get_webmap_layers(gis, item_id: str) -> pd.DataFrame:
-    """List operational layers (and basemaps) inside a Web Map item."""
-    from arcgis.mapping import WebMap
+    """List operational layers (and basemaps) inside a Web Map item.
+
+    Uses ``arcgis.map.Map`` (ArcGIS API for Python 2.4+; the old
+    ``arcgis.mapping.WebMap`` was removed in 2.4).
+    """
+    from arcgis.map import Map
 
     item = gis.content.get(item_id)
     if item is None:
         raise ValueError(f"No item found with id {item_id!r}")
-    wm = WebMap(item)
+    wm = Map(item)
+
+    # 2.4 exposes operational layers via ``.content.layers``; older builds used
+    # ``.layers`` directly. Support both so the helper degrades gracefully.
+    raw_layers = getattr(getattr(wm, "content", None), "layers", None)
+    if raw_layers is None:
+        raw_layers = getattr(wm, "layers", [])
 
     rows = []
-    for lyr in wm.layers:
+    for lyr in raw_layers:
         d = dict(lyr) if not isinstance(lyr, dict) else lyr
         rows.append(
             {

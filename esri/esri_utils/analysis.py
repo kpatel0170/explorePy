@@ -9,38 +9,21 @@ from __future__ import annotations
 
 import pandas as pd
 
-GEOM_COL = "SHAPE"
+# SDF<->GDF conversion + the geometry column constant live in _core so the
+# whole package shares one implementation. Re-exported here for back-compat:
+# ``from esri_utils.analysis import to_geodataframe`` keeps working.
+from ._core import GEOM_COL, to_geodataframe, to_sdf
 
-
-def to_geodataframe(sdf: pd.DataFrame, crs: int | str = 4326):
-    """Convert a Spatially Enabled DataFrame -> GeoDataFrame.
-
-    Uses the SDF's native conversion when available, else rebuilds geometry
-    from the SHAPE column via shapely.
-    """
-    import geopandas as gpd
-
-    # arcgis SDFs expose this directly in recent versions.
-    if hasattr(sdf, "spatial") and hasattr(sdf.spatial, "to_featureset"):
-        try:
-            gj = sdf.spatial.to_featureset().to_geojson
-            import json
-
-            return gpd.read_file(gj if isinstance(gj, str) else json.dumps(gj))
-        except Exception:
-            pass
-
-    from shapely.geometry import shape
-
-    geom = sdf[GEOM_COL].apply(lambda g: shape(g) if isinstance(g, dict) else g)
-    return gpd.GeoDataFrame(sdf.drop(columns=[GEOM_COL]), geometry=geom, crs=crs)
-
-
-def to_sdf(gdf) -> pd.DataFrame:
-    """Convert a GeoDataFrame back to a Spatially Enabled DataFrame."""
-    from arcgis.features import GeoAccessor  # noqa: F401  (registers .spatial)
-
-    return pd.DataFrame.spatial.from_geodataframe(gdf)
+__all__ = [
+    "GEOM_COL",
+    "to_geodataframe",
+    "to_sdf",
+    "tabular_merge",
+    "spatial_join",
+    "aggregate_by_polygon",
+    "buffer",
+    "dissolve",
+]
 
 
 def tabular_merge(
@@ -53,9 +36,7 @@ def tabular_merge(
     """Attribute join (keeps left geometry). Thin, validated wrapper on merge."""
     geom = left[GEOM_COL] if GEOM_COL in left.columns else None
     right = right.drop(columns=[GEOM_COL], errors="ignore")
-    merged = left.drop(columns=[GEOM_COL], errors="ignore").merge(
-        right, on=on, how=how, validate=validate
-    )
+    merged = left.drop(columns=[GEOM_COL], errors="ignore").merge(right, on=on, how=how, validate=validate)
     if geom is not None:
         merged[GEOM_COL] = geom.reset_index(drop=True)
     return merged

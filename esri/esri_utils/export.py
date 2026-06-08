@@ -90,7 +90,7 @@ def export_web_map(
     -------
     str (path) if *out_path* was given, else bytes of the exported file.
     """
-    from arcgis.mapping import WebMap
+    from arcgis.map import Map
 
     if web_map_id and web_map_json:
         raise ValueError("Provide either web_map_id or web_map_json, not both.")
@@ -101,9 +101,9 @@ def export_web_map(
         item = gis.content.get(web_map_id)
         if item is None:
             raise ValueError(f"No Web Map found with id {web_map_id!r}")
-        wm = WebMap(item)
+        wm = Map(item)
     else:
-        wm = WebMap(web_map_json)
+        wm = Map(web_map_json)
 
     params = {
         "format": fmt,
@@ -115,6 +115,11 @@ def export_web_map(
         params["template_label"] = template_label
     params.update(export_kwargs)
 
+    if not hasattr(wm, "print_map"):
+        raise AttributeError(
+            "This arcgis.map.Map has no 'print_map' method — your ArcGIS API for "
+            "Python build may expose printing differently. Check the version's docs."
+        )
     result = wm.print_map(gis=gis, print_params=params)
 
     if out_path:

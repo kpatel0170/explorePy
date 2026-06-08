@@ -10,7 +10,7 @@ import re
 
 import pandas as pd
 
-GEOM_COL = "SHAPE"
+from ._core import GEOM_COL
 
 
 def standardize_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -62,11 +62,7 @@ def trim_strings(df: pd.DataFrame) -> pd.DataFrame:
         if col == GEOM_COL:
             continue
         df[col] = (
-            df[col]
-            .astype("string")
-            .str.strip()
-            .str.replace(r"\s+", " ", regex=True)
-            .replace({"": pd.NA})
+            df[col].astype("string").str.strip().str.replace(r"\s+", " ", regex=True).replace({"": pd.NA})
         )
     return df
 

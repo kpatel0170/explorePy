@@ -16,23 +16,14 @@ Usage
 
 from __future__ import annotations
 
-from typing import Any
-
 import pandas as pd
+
+from ._core import to_featureset as _to_featureset
 
 
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
-def _to_featureset(
-    sdf_or_gdf,
-) -> Any:
-    """Convert an SDF or GeoDataFrame to a FeatureSet for the solvers."""
-    from arcgis.features import FeatureSet
-
-    if hasattr(sdf_or_gdf, "spatial") and hasattr(sdf_or_gdf.spatial, "to_featureset"):
-        return sdf_or_gdf.spatial.to_featureset()
-    return FeatureSet.from_geodataframe(sdf_or_gdf) if hasattr(sdf_or_gdf, "crs") else None  # noqa: E501
 
 
 def extract_result_layer(result: dict, key: str) -> pd.DataFrame:
