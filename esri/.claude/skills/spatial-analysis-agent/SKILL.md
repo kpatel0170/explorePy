@@ -45,6 +45,18 @@ out_sdf = analysis.to_sdf(result)
 sdf_to_layer(out_sdf, gis, title="Analysis Result")
 ```
 
+## Reference library — load on demand
+
+| File | Load when... |
+|------|-------------|
+| [numpy-pandas-spatial](references/numpy-pandas-spatial.md) | Memory optimization, vectorized ops, KDTree, groupby dissolve, spatiotemporal, Parquet/Feather I/O |
+| [sdf-advanced](references/sdf-advanced.md) | SDF `.spatial` accessor deep-dive, spatial index, geometry engine, CRS, round-trip fidelity, publishing |
+| [geopandas-advanced](references/geopandas-advanced.md) | Overlay/dissolve/explode, sindex query_bulk, CRS expert patterns, geometry validation/repair, large-scale dask, shapely 2.x ufuncs |
+| [spatial-etl](references/spatial-etl.md) | Medallion pipeline architecture, GeoParquet, tile-based processing, DuckDB Spatial, streaming, parallel, quality gates |
+| [arcpy-patterns](references/arcpy-patterns.md) | arcpy cursors, env management, APRX, SDE, error codes |
+| [CRS-reference](references/CRS-reference.md) | CRS reprojection, zone finder, buffer/distance safety |
+| [arcgis-query-patterns](references/arcgis-query-patterns.md) | Feature layer query optimization, spatial filters, chunking |
+
 ## Tool selection — engine decision tree
 
 Ask these questions in order:
@@ -101,6 +113,8 @@ Interop: arcpy for heavy local GDB → publish via arcgis API.
 | Overlay/dissolve | No built-in | `gpd.overlay()`, `.dissolve()` |
 | Buffer | `.spatial.buffer()` arcgis | `.buffer()` shapely |
 | CRS fidelity | Full WKID support | EPSG+proj (some esri WKIDs missing) |
+
+See [SDF advanced](references/sdf-advanced.md) for index, engine, CRS round-trip, and publishing deep-dive.
 
 Rule: Pull Portal → SDF → GDF for analysis → publish via SDF.
 
@@ -219,6 +233,8 @@ See [arcpy reference](references/arcpy-patterns.md) for cursors, env, errors.
 - `in_memory` workspace for intermediates
 - `del aprx` after save to release lock
 
+See [geopandas advanced](references/geopandas-advanced.md) for overlay, spatial index, CRS expert patterns, shapely 2.x ufuncs, and dask-parallel dissolve.
+
 ## Geometry validation & repair
 
 ```python
@@ -230,6 +246,8 @@ gdf.loc[invalid, "geometry"] = gdf.loc[invalid, "geometry"].apply(
     lambda g: make_valid(g, method="structure")
 )
 ```
+
+For large-scale pipelines (GeoParquet, medallion arch, streaming, DuckDB Spatial) see [spatial ETL](references/spatial-etl.md). For numpy/pandas memory patterns, KDTree, vectorized ops, and spatiotemporal refer to [numpy-pandas-spatial](references/numpy-pandas-spatial.md).
 
 ## Edge cases — always check
 
