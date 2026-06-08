@@ -89,6 +89,9 @@ cli      argparse CLI (connect-test/search/services/query/geocode)
 - Enterprise auth/admin/migration/publish: `enterprise-portal-workflows`.
 - New module/project setup: `esri-project-init`.
 - Simplify/consolidate helpers: `esri-utils-best-practices`.
+- **Spatial analysis agentic coding (meta-skill):** `spatial-analysis-agent`.
+  Load for CRS guidance, engine choice, query patterns, arcpy patterns,
+  geometry validation/repair, and testing conventions.
 
 ## Verify before handoff
 
