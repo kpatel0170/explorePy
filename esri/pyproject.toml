@@ -1,20 +1,27 @@
 [project]
 name = "esri"
-version = "0.2.0"
+version = "0.4.0"
 description = "Utility toolkit for ArcGIS Enterprise (ArcGIS API for Python, pandas/SDF, geopandas, arcpy)"
-requires-python = ">=3.10"
+# arcgis 2.4.3 requires Python >=3.11,<3.15.
+requires-python = ">=3.11,<3.15"
 dependencies = [
-  "arcgis>=2.3",
-  "pandas>=2.0",
-  "geopandas>=0.14",
-  "shapely>=2.0",
-  "matplotlib>=3.7",
-  "streamlit>=1.30",
+  # arcgis 2.4.3 bundles its own constrained pandas (>=2.3,<4) and numpy (>=2.3,<3);
+  # those caps win during resolution, so we only set sensible floors here.
+  "arcgis>=2.4.3",
+  "pandas>=2.3",
+  "geopandas>=1.0",
+  "shapely>=2.1",
+  "matplotlib>=3.8",
+  "streamlit>=1.40",
   "python-dotenv>=1.0",
 ]
 
 # arcpy ships with ArcGIS Pro / Server and is NOT pip/uv-installable.
-# The arcpy_* modules only run inside an ArcGIS Pro conda environment.
+# The arcpy_* modules only run inside an ArcGIS Pro 3.4+ conda environment
+# (the version cloned for ArcGIS API for Python 2.4).
+
+[project.scripts]
+esri = "esri_utils.cli:main"
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest"]
@@ -22,7 +29,16 @@ dev = ["ruff", "pytest"]
 addr = ["rapidfuzz>=3.0", "usaddress>=0.5.10"]
 
 [tool.uv]
-package = false
+# Installable so the `esri` console script is available after `uv sync`.
+# (`python -m esri_utils` also works with no install.)
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["esri_utils"]
 
 [tool.ruff]
 line-length = 110
