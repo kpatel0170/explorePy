@@ -1,6 +1,12 @@
 # esri — ArcGIS Enterprise toolkit
 
+Requires **ArcGIS API for Python 2.4.3+** (`arcgis>=2.4.3`) on **Python 3.11–3.14**.
+Pairs with geopandas 1.x, shapely 2.1, pandas 2.3/3.x (arcgis caps pandas `<4`,
+numpy `<3`). Web-map / printing helpers use `arcgis.map.Map` (the old
+`arcgis.mapping.WebMap` was removed in 2.4).
+
 ```
+_core        GEOM_COL, spatial-accessor registration, SDF↔GDF, to_featureset
 layers       FeatureLayer → SDF, publish, edits, attachments
 sdf          Spatially Enabled DataFrame: from_xy, sjoin, buffer, export, plot
 cleaning     snake_case, coerce types, trim strings, dedupe, null report
@@ -14,7 +20,9 @@ geoenrich    enrich study areas, standard geo query, reports
 arcpy_db     gdb/SDE ops (arcpy-only)
 arcpy_aprx   .aprx repair sources, symbology, export layouts (arcpy-only)
 viz          choropleth, categorical, overlay maps
+fire         SK fire-threat clouds: NASA FIRMS + CWFIS → buffered/dissolved FIRE_AREA by age
 address_recon Optius → CAR/AM address match
+cli          argparse CLI: connect-test, search, services, query, geocode, fire
 ```
 
 ## Auth
@@ -96,6 +104,42 @@ standard_geography_query(gis, "US", "USA.County", geoquery="San Diego*")
 
 > `arcpy_db`/`arcpy_aprx` require ArcGIS Pro env. `address_recon` needs `uv sync --extra addr`.
 
+## CLI
+
+```bash
+esri connect-test                                  # after `uv sync`
+esri search --type "Feature Service" --owner planning_dept
+esri services --folder Hosted
+esri query <item-id> --where "STATE='CA'" --out ca.csv
+esri geocode "123 Main St, Springfield, IL"
+esri fire --days 7 --out fire_sk.geojson           # SK fire-threat clouds
+python -m esri_utils <command>                     # no install needed
+```
+
+### Fire-threat analysis (Saskatchewan)
+
+```python
+from esri_utils.fire import fire_threat_analysis
+clouds = fire_threat_analysis(day_range=7)          # FIRE_AREA GeoDataFrame
+clouds[["age_class", "fire_area_km2", "n_reliable"]]
+clouds.to_file("fire_sk.geojson", driver="GeoJSON")
+```
+
+Combines **NASA FIRMS** (MODIS + VIIRS SNPP/NOAA-20/NOAA-21) hotspots with
+**CWFIS** agency-reported active fires, filters to Saskatchewan, drops
+low-confidence false positives (CWFIS = ground truth), then data-driven
+buffer → dissolve → smooth/shrink into one **cloud polygon per age class**
+(`<24h`, `24-48h`, `48-96h`, `>96h`). Clouds are **distinct and drawn
+new-over-old** — older classes form a larger, paler background; the recent
+`<24h` cloud is smaller and saturated, on top (`draw_order` / `fill_color` /
+`fill_alpha` columns make styling turnkey; pass `nested=True` for cumulative
+concentric zones). Set `FIRMS_MAP_KEY` for satellite data
+([free key](https://firms.modaps.eosdis.nasa.gov/api/)); runs on CWFIS alone
+without it. See `examples/fire_threat_sk.py`.
+
 ```bash
 streamlit run esri/apps/streamlit_app.py     # quick UI explorer
 ```
+
+> Web-map helpers (`portal.get_webmap_layers`, `export.export_web_map`) now use
+> `arcgis.map.Map`. Verify against a live ArcGIS 2.4 Portal after upgrading.
