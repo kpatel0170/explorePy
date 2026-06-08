@@ -21,7 +21,10 @@ from typing import Any
 
 import pandas as pd
 
-GEOM_COL = "SHAPE"
+from ._core import GEOM_COL, register_spatial, to_featureset as _to_featureset, validate_sdf
+
+_register_spatial = register_spatial
+_validate_sdf = validate_sdf
 
 
 # --------------------------------------------------------------------------- #
@@ -107,12 +110,10 @@ def from_featureclass(path: str, **kwargs) -> pd.DataFrame:
 
 
 def from_geodataframe(gdf) -> pd.DataFrame:
-    """Convert a geopandas GeoDataFrame to a Spatially Enabled DataFrame.
+    """Convert a geopandas GeoDataFrame to a Spatially Enabled DataFrame."""
+    from ._core import to_sdf
 
-    Uses ``pd.DataFrame.spatial.from_geodataframe``.
-    """
-    _register_spatial()
-    return pd.DataFrame.spatial.from_geodataframe(gdf)
+    return to_sdf(gdf)
 
 
 # --------------------------------------------------------------------------- #
@@ -243,7 +244,7 @@ def to_featureset(sdf: pd.DataFrame) -> Any:
     Useful as input to network analysis or geoprocessing tools.
     """
     _validate_sdf(sdf, "sdf")
-    return sdf.spatial.to_featureset()
+    return _to_featureset(sdf)
 
 
 def to_featurecollection(sdf: pd.DataFrame) -> Any:
@@ -304,24 +305,5 @@ def plot_sdf(sdf: pd.DataFrame, map_widget=None, **plot_kwargs):
     return sdf.spatial.plot(map_widget=map_widget, **plot_kwargs)
 
 
-# --------------------------------------------------------------------------- #
-# Internals
-# --------------------------------------------------------------------------- #
-_SPATIAL_REGISTERED = False
-
-
-def _register_spatial():
-    """Ensure the ``.spatial`` and ``.geom`` accessors are registered."""
-    global _SPATIAL_REGISTERED
-    if not _SPATIAL_REGISTERED:
-        from arcgis.features import GeoAccessor, GeoSeriesAccessor  # noqa: F401
-
-        _SPATIAL_REGISTERED = True
-
-
-def _validate_sdf(df: pd.DataFrame, label: str = "df"):
-    """Check that *df* is spatially enabled."""
-    if not hasattr(df, "spatial") or GEOM_COL not in df.columns:
-        raise TypeError(
-            f"{label} is not spatially enabled. Use from_xy(), from_layer(), or from_geodataframe() first."
-        )
+# Spatial-accessor registration, validation, and conversions now live in
+# ``esri_utils._core`` — imported at the top of this module.
